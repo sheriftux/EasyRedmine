@@ -7,7 +7,7 @@ group_id: 1005
 
 #Server information
 srv_hostname: easyremine
-srv_pub_ip: 0.0.0.0
+srv_pub_ip: 192.168.1.59
 srv_pri_ip: localhost
 
 #Nginx server configuration

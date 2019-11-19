@@ -1,11 +1,11 @@
 ---
 - name: Deploy System Requirments and Copy Repositories
   hosts: easyremine-app
-  user: easy
-  become: yes
-  connection: ssh
-  #vars:
-  # ansible_become_pass: R00tG@teTEaM
+  user: root
+#  become: yes
+#  connection: ssh
+#  vars:
+#   ansible_become_pass: jjksdf$#dchkl*
   roles:
     - role: "../Deployment/repos"
     - role: "../Deployment/system"
