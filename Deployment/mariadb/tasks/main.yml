@@ -17,5 +17,5 @@
 - name: Create easyremine database
   mysql_db: name={{ db_name }} state=present
 
-- name: Create WordPress database user
-  mysql_user: name={{ wp_db_user }} password={{ wp_db_password }} priv={{ wp_db_name }}.*:ALL host={{ srv_pri_ip }} state=present
+- name: Create easyremine database user
+  mysql_user: name={{ db_user }} password={{ db_password }} priv={{ db_name }}.*:ALL host={{ srv_pri_ip }} state=present
