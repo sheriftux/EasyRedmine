@@ -21,11 +21,9 @@
     - role: "../Deployment/secure_db"
 
 - name: Copy The Templates Files
-  hosts: EasyRedmine
-  user: easy
-  become: yes
-  connection: ssh
-#  vars:
+  hosts: easyremine-app
+  user: root
+  #  vars:
 #   ansible_become_pass: jjksdf$#dchkl*
 #   ansible_ssh_port: 22
   roles:
