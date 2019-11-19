@@ -11,6 +11,10 @@
     - role: "../Deployment/system"
 
 - name: Install Nginx And Mariadb
+  hosts: easyremine-app
+  user: root
+  #vars:
+  # ansible_become_pass: jjksdf$#dchkl*
   roles:
     - role: "../Deployment/nginx"
     - role: "../Deployment/mariadb"
