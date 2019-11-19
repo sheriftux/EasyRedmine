@@ -4,34 +4,32 @@
   user: easy
   become: yes
   connection: ssh
-  vars:
-   ansible_become_pass: R00tG@teTEaM
+  #vars:
+  # ansible_become_pass: R00tG@teTEaM
   roles:
     - role: "../Deployment/repos"
     - role: "../Deployment/system"
 
-- name: Install Nginx, PHP-FPM And Mariadb
-  hosts: webserver
-  user: rootgate
+- name: Install Nginx And Mariadb
+  hosts: EasyRedmine
+  user: easy
   become: yes
   connection: ssh
-  vars:
-   ansible_become_pass: R00tG@teTEaM
-   ansible_ssh_port: 9621
+  #vars:
+  # ansible_become_pass: jjksdf$#dchkl*
   roles:
     - role: "../Deployment/nginx"
-    - role: "../Deployment/php-fpm"
     - role: "../Deployment/mariadb"
     - role: "../Deployment/secure_db"
 
 - name: Copy The Templates Files
-  hosts: webserver
-  user: rootgate
+  hosts: EasyRedmine
+  user: easy
   become: yes
   connection: ssh
-  vars:
-   ansible_become_pass: R00tG@teTEaM
-   ansible_ssh_port: 9621
+#  vars:
+#   ansible_become_pass: jjksdf$#dchkl*
+#   ansible_ssh_port: 22
   roles:
     - role: "../Deployment/temp"
 
@@ -40,7 +38,7 @@
 #  user: rootgate
 #  become: yes
 #  vars:
-#    ansible_become_pass: R00tG@teTEaM
+#    ansible_become_pass: jjksdf$#dchkl*
 #  roles:
 #    - role: "../Deployment/postfix"
 
@@ -52,21 +50,3 @@
 #    ansible_become_pass: R00tG@teTEaM
 #  roles:
 #    - role: "../Deployment/ssh_conf"
-
-#- name: Install Varnish Server
-#  hosts: webserver
-#  user: rootgate
-#  become: yes
-#  vars:
-#    ansible_become_pass: R00tG@teTEaM
-#  roles:
-#    - role: "../Deployment/varnish_server"
-
-#- name: Configure IpTables Security on Varnish Server
-#  hosts: webserver
-#  user: rootgate
-#  become: yes
-#  vars:
-#    ansible_become_pass: R00tG@teTEaM
-#  roles:
-#    - role: "../Deployment/iptables"
