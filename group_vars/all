@@ -1,44 +1,37 @@
 ---
 #System Informations
-sys_user: akhbaralahly
-sys_grp: akhbaralahly
+sys_user: easy
+sys_grp: easy
 user_id: 1005
 group_id: 1005
 
-srv_hostname: AIO-AlAhlyEg
-srv_pub_ip: 206.189.123.4
+#Server information
+srv_hostname: easyremine
+srv_pub_ip: 0.0.0.0
 srv_pri_ip: localhost
 
-#Nginx-PHP server configuration
+#Nginx server configuration
 nginx_port: 80
-#varnish_port: 8080
-server_hostname: ahlyeg.com www.ahlyeg.com
-rootdir_nginx: /home/{{ sys_user }}/public_html/web
-rootdir: /home/{{ sys_user }}/public_html/
+server_hostname: easyredmine
+rootdir_nginx: /home/{{ sys_user }}/public/
+rootdir: /home/{{ sys_user }}/public/
 
 #MySQL Settings
 mysqlservice: mysqld
 mysql_port: 3306
 mysql_root_username: root
-mysql_root_password: T&49idEH$@Fr
+mysql_root_password: T&49idEH$@Frrthegf
 
 #Redmine Settings
 db_name: easy
 db_user: easy
 db_password: B83JEMLDZ@gH
-#Home: http://ahlyeg.com
+#Home: http://easyredmine.com
 
 #Templates Files
-src_db_backup: ../../../akhbaralahly/files/akhbaralahly.sql
-dest_db_backup: /tmp/akhbaralahly.sql
-src_web_backup: ../../../akhbaralahly/files/public_html.tar.gz
+src_db_backup: ../../../easyremine/files/easyremine.sql
+dest_db_backup: /tmp/easyremine.sql
+src_web_backup: ../../../easyremine/files/public_html.tar.gz
 dest_web_backup: /home/{{ sys_user }}/public_html.tar.gz
 src_ng_conf: nginx_vhost.conf
-dest_ng_conf: /etc/nginx/conf.d/akhbaralahly.conf
-src_php_conf: php_fpm_conf.conf
-dest_php_conf: /etc/php-fpm.d/akhbaralahly.conf
-
-#iptables_templates
-#iptables_tem: iptables-stackpath
-iptables_tem: iptables-cloudflare
-#iptables_tem: iptables-incapsula
+dest_ng_conf: /etc/nginx/conf.d/easyremine.conf
