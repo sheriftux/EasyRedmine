@@ -29,8 +29,8 @@
 - name: Change System User Dir Mode
   file: path=/home/{{ sys_user }} mode=0755
 
-- name: Create public_html Directory
-  file: path=/home/{{ sys_user}}/public/ state=directory owner={{ sys_user }} group={{ sys_grp }} mode=0775
+- name: Create public Directory
+  file: path=/home/{{ sys_user}}/public/ state=directory owner={{ sys_user }} group={{ sys_grp }} mode=0755
 
 - name: Create logs Directory
-  file: path=/home/{{ sys_user}}/logs/ state=directory owner={{ sys_user }} group={{ sys_grp }} mode=0775
+  file: path=/home/{{ sys_user}}/logs/ state=directory owner={{ sys_user }} group={{ sys_grp }} mode=0755
