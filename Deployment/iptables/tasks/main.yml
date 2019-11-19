@@ -1,0 +1,14 @@
+---
+- name: required packages
+  yum: name={{ item }} state=present
+  with_items:
+      - iptables
+      - iptables-services
+
+- name: Copy iptables repo file
+  copy:
+      src: {{ iptables_tem }}
+      dest: /etc/sysconfig/iptables
+
+- name: Ensure iptables is working
+  service: name=iptables state=restarted enabled=yes

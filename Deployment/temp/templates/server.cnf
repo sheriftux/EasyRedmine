@@ -1,0 +1,72 @@
+#
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+#
+# See the examples of server my.cnf files in /usr/share/mysql/
+#
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+# this is only for the mysqld standalone daemon
+
+[mysqld]
+bind-address                    = 127.0.0.1
+binlog_format                   = row
+
+log_warnings                    = 2
+log-error                       = error.log
+
+#slow_query_log_file            = slow_qeries.log
+#long_query_time                = 5
+min_examined_row_limit         = 100
+
+# general_log_file               = all_guerry.log
+# general_log                    = 0
+
+character_set_server            = utf8mb4
+collation_server                = utf8mb4_general_ci
+query_cache_type                = 1
+query_cache_size                = 60M
+sort_buffer_size                = 5M
+tmp_table_size                  = 60M
+read_buffer_size                = 1M
+join_buffer_size                = 1M
+
+default_storage_engine          = InnoDB
+innodb_autoinc_lock_mode        = 2
+innodb_buffer_pool_size         = 60M
+innodb_file_per_table           = 1
+innodb_flush_log_at_trx_commit  = 2
+
+innodb_file_format              = BARRACUDA
+innodb_large_prefix             = 1
+
+[mysqldump]
+max_allowed_packet              = 200M
+add_drop_table                  = True
+# insert per line, great for diff, but slow
+#extended_insert                 = False
+
+
+#
+# Allow server to accept connections on all interfaces.
+#
+#bind-address=0.0.0.0
+#
+# Optional setting
+#wsrep_slave_threads=1
+#innodb_flush_log_at_trx_commit=0
+
+# this is only for embedded server
+[embedded]
+
+# This group is only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here
+[mariadb]
+
+# This group is only read by MariaDB-10.1 servers.
+# If you use the same .cnf file for MariaDB of different versions,
+# use this group for options that older servers don't understand
+[mariadb-10.1]

@@ -1,0 +1,37 @@
+---
+- name: Update The System Packages
+  yum: name=* state=latest update_cache=yes
+
+- name: Ensure NTP (for time synchronization) is installed.
+  yum: name=ntp state=present
+
+- name: Ensure NTP is running.
+  service: name=ntpd state=started enabled=yes
+
+- name: required packages
+  yum: name={{ item }} state=present
+  with_items:
+      - nmap
+      - vim
+      - wget
+      - htop
+      - git
+
+- name: Setting Server hostname
+  hostname: name={{ srv_hostname }}
+
+- name: Add System group
+  group: name={{ sys_grp }} gid={{ group_id }}
+
+- name: Add System user
+  user: name={{ sys_user }} group={{ sys_grp }} uid={{ user_id }} shell=/bin/nologin append=yes
+
+- name: Change System User Dir Mode
+  file: path=/home/{{ sys_user }} mode=0755
+
+- name: Create public_html Directory
+  file: path=/home/{{ sys_user}}/public_html/ state=directory owner={{ sys_user }} group={{ sys_grp }} mode=0775
+
+- name: Create logs Directory
+  file: path=/home/{{ sys_user}}/logs/ state=directory owner={{ sys_user }} group={{ sys_grp }} mode=0775
+

@@ -1,0 +1,32 @@
+---
+- name: Install php-fpm and deps
+  yum: name={{ item }} state=present
+  with_items:
+      - php56w-mysqlnd
+      - php56w-gd
+      - php56w-process
+      - php56w-xml
+      - php56w-pear
+      - php56w-pecl-memcached
+      - php56w-pecl-memcache
+      - php56w-common
+      - php56w-pdo
+      - php56w
+      - php56w-bcmath
+      - php56w-tidy
+      - php56w-intl
+      - php56w-xmlrpc
+      - php56w-mcrypt
+      - php56w-pecl-igbinary
+      - php56w-pecl-apcu
+      - php56w-cli
+      - php56w-devel
+      - php56w-fpm
+      - php56w-mbstring
+
+- name: Create a new directory for session path.
+  file: path=/var/lib/php/session/ state=directory owner=nginx group=nginx mode=0777
+
+- name: Start PHP-Fpm Service
+  service: name=php-fpm state=started enabled=yes
+

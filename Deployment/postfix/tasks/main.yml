@@ -1,0 +1,12 @@
+---
+- name: Ensure Postfinx is running.
+  service: name=postfix state=started enabled=yes
+
+- name: Copy postfix Configuration file Template.
+  template: src=main.cf dest=/etc/postfix/main.cf owner=root group=root mode=0644
+
+- name: Restart postfix Service
+  service: name=postfix state=restarted
+
+- name: install mailx packages
+  yum: name=mailx state=installed

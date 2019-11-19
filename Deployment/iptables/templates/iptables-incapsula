@@ -1,0 +1,36 @@
+# sample configuration for iptables service
+# you can edit this manually or use system-config-firewall
+# please do not ask us to add additional ports/services to this default configuration
+*filter
+:INPUT DROP [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+#localhost
+-A INPUT -i lo -j ACCEPT
+
+#Related And establshed connections
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p tcp -m state --state NEW,RELATED,ESTABLISHED -m tcp --dport 9621 -j ACCEPT
+
+#SSH Server
+-A INPUT -s 159.122.20.154 -j ACCEPT
+-A INPUT -s 10.71.60.57 -j ACCEPT
+
+#Varnish Server
+-A INPUT -s {{ web_pub_ip }} -j ACCEPT
+
+#Incapsula IPs
+-A INPUT -s 199.83.128.0/21 -p tcp --dport http -j ACCEPT
+-A INPUT -s 198.143.32.0/19 -p tcp --dport http -j ACCEPT
+-A INPUT -s 149.126.72.0/21 -p tcp --dport http -j ACCEPT
+-A INPUT -s 103.28.248.0/22 -p tcp --dport http -j ACCEPT
+-A INPUT -s 185.11.124.0/22 -p tcp --dport http -j ACCEPT
+-A INPUT -s 45.64.64.0/22 -p tcp --dport http -j ACCEPT
+-A INPUT -s 192.230.64.0/18 -p tcp --dport http -j ACCEPT
+-A INPUT -s 107.154.0.0/16 -p tcp --dport http -j ACCEPT
+-A INPUT -s 45.60.0.0/16 -p tcp --dport http -j ACCEPT
+-A INPUT -s 45.223.0.0/16 -p tcp --dport http -j ACCEPT
+
+COMMIT
+

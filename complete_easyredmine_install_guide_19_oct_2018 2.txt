@@ -1,0 +1,446 @@
+
+This how-to describes installation on server dedicated for just one web application. If you use server containing another software be very cautious during this process and modify all steps where you may interfere with the running system!!!
+
+The first step is to disable selinux by setting option SELINUX to disabled in /etc/selinux/config and then restart server. If you are an advanced selinux administrator, we recommend to keep it on. But for most users selinux is very complex for understanding and beyond the scope of this manual to describe, so let's keep it disabled.
+
+
+Step overview
+
+ - Prepare database server
+ - Prepare rails environment
+ - Install application
+ - Install and configure nginx
+
+
+Prepare database
+================
+
+We recomend to use mariadb (in this manual) or perconadb
+
+Install server and client packages
+
+```
+yum install mariadb-server mariadb
+```
+
+We recomend this configuration in /etc/my.cnf
+```
+[mysqld]
+bind-address                    = 127.0.0.1
+binlog_format                   = row
+
+log_warnings                    = 2
+log-error                       = error.log
+
+#slow_query_log_file            = slow_qeries.log
+#long_query_time                = 5
+min_examined_row_limit         = 100
+
+# general_log_file               = all_guerry.log
+# general_log                    = 0
+
+character_set_server            = utf8mb4
+collation_server                = utf8mb4_general_ci
+query_cache_type                = 1
+query_cache_size                = 60M
+sort_buffer_size                = 5M
+tmp_table_size                  = 60M
+read_buffer_size                = 1M
+join_buffer_size                = 1M
+
+default_storage_engine          = InnoDB
+innodb_autoinc_lock_mode        = 2
+innodb_buffer_pool_size         = 60M
+innodb_file_per_table           = 1
+innodb_flush_log_at_trx_commit  = 2
+
+innodb_file_format              = BARRACUDA
+innodb_large_prefix             = 1
+
+[mysqldump]
+max_allowed_packet              = 200M
+add_drop_table                  = True
+# insert per line, great for diff, but slow
+#extended_insert                 = False
+```
+
+start mysql server
+```
+systemctl start mysql.service
+```
+
+Do initial mysql configuration by ```mysql_secure_installation``` and follow instructions (the most important step is to set password)
+
+Create user for our application
+```
+mysql -u root -pROOT_PASSWORD
+```
+
+create database easy char set utf8mb4;
+```
+grant all on easy.* to easy@localhost identified by 'EASY_STRONG_PASSWORD';
+flush privileges;
+exit;
+```
+
+
+Now you have database called easy and user easy with password EASY_STRONG_PASSWORD.
+
+
+
+Prepare RAILS environment
+=========================
+
+We recommend to use ruby at least in version 2.3+ by RVM (see https://rvm.io/). Best practice is to run each application under dedicated common user without root's privileges. So we describe steps using RVM, ruby 2.5 with railsexpress patch under dedicated user called easy on linux distribution CentOS.
+
+
+Install epel and update system
+------------------------------
+```
+yum install -y epel-release
+yum update -y
+```
+
+Install dependencies and useful tools
+--------------------------------------
+
+```
+yum install -y curl \
+  bzip2 \
+  gettext \
+  ImageMagick \
+  patch \
+  libtool \
+  automake \
+  gcc-c++ \
+  autoconf \
+  bison \
+  glibc-devel \
+  glibc-headers \
+  openssl-devel \
+  libyaml-devel \
+  ImageMagick-devel \
+  libffi-devel \
+  ruby-devel \
+  libuuid-devel \
+  mariadb-devel \
+  zlib-devel \
+  sqlite-devel \
+  make \
+  unzip \
+  readline-devel
+```
+
+Install rvm under root (multiuser instalation)
+----------------------------------------------
+```
+curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
+curl -sSL https://get.rvm.io | sudo bash -s master
+```
+
+As we said we recommend to run application under common user (easy for example), so create user easy and add him to group rvm, switch under user and then install ruby with railsexpress patch
+```
+useradd -m -G rvm -s /bin/bash easy
+```
+
+If you already have user, run this command
+```
+usermod -aG rvm easy
+```
+
+
+!!!! NOW SWITCH UNDER USER EASY !!!!
+
+```
+rvm list known                  # list all available rubies
+rvm get master                  # upgrade rvm if necessary
+
+rvm install 2.5.0 --patch railsexpress
+rvm use 2.5.0 --default
+rvm list			# just for be sure
+```
+
+
+Now you have installed right version of ruby under RVM and set this version as default. So we can install the application.
+
+
+
+Install application
+===================
+
+
+Now copy zip file to user's home for example by command scp ./easyredmine.com.zip easy@centos.example.com:~/
+
+On server as user easy run these commands:
+
+```
+gem install bundler unicorn --no-rdoc --no-ri
+
+echo $PWD			# should return something like /home/easy/current if you are in the right directory
+mkdir current && cd current
+unzip ../easyredmine.com.zip
+ls -al	# you should see directories like public, config etc
+```
+
+Configure application
+---------------------
+Here are configuration examples of most important files
+
+
+The first requirement is database, in our case we use mysql, for more examples see
+http://www.redmine.org/projects/redmine/wiki/redmineinstall#Step-3-Database-connection-configuration
+
+```
+cat > ./config/database.yml << EOF
+production:
+  adapter: mysql2
+  database: easy
+  host: 127.0.0.1
+  username: easy
+  password: "EASY_STRONG_PASSWORD"
+  encoding: utf8mb4
+
+EOF
+```
+
+For email notifications you must set smtp server, in our case we have mailserver locally
+More examples you can find here https://documentation.easyredmine.com/easy_knowledge_stories/180
+
+```
+cat > ./config/configuration.yml << EOF
+default:
+  email_delivery:
+    delivery_method: :smtp
+    smtp_settings:
+      address: 127.0.0.1
+      authentication: :none
+
+EOF
+```
+
+Install GEMs and deploy application
+-----------------------------------
+File Gemfile contains all application dependencies and by utility bundler you can install all these deps in one command.
+
+```
+gem update --system # update rubygems for security fixes
+gem install bundler # install bundler
+
+bundle install --without development test
+```
+
+
+This command runs for a long time. If this process fails in any gem, you can install required library be searching which package includes required header file (in most cases google will help you).
+
+The final step is to finalize deployment of application's database, assests etc...
+```
+bundle exec rake easyproject:install RAILS_ENV=production
+```
+
+
+
+Configure unicorn
+-----------------
+
+put example unicorn configuration to /home/easy/unicorn.rb
+
+```
+cat > /home/easy/unicorn.rb << EOF
+app_home="/home/easy"
+
+
+worker_processes 4
+timeout 3600
+preload_app true
+
+listen "#{app_home}/application.sock", :backlog => 64
+pid "#{app_home}/application.pid"
+
+stdout_path "#{app_home}/current/log/unicorn.log"
+stderr_path "#{app_home}/current/log/unicorn.err"
+
+before_fork do |server, worker|
+  # Close all open connections
+  if defined?(ActiveRecord::Base)
+    ActiveRecord::Base.connection.disconnect!
+  end
+
+  old_pid = "#{server.config[:pid]}.oldbin"
+  if old_pid != server.pid
+    begin
+      sig = (worker.nr + 1) >= server.worker_processes ? :QUIT : :TTOU
+      Process.kill(sig, File.read(old_pid).to_i)
+    rescue Errno::ENOENT, Errno::ESRCH
+    end
+  end
+
+end
+
+after_fork do |server, worker|
+  # Reopen all connections
+  if defined?(ActiveRecord::Base)
+    ActiveRecord::Base.establish_connection
+  end
+end
+EOF
+```
+
+Under root user create systemd service for unicorn by pasting source below and reload systemd daemon.
+```
+cat > /etc/systemd/system/easy.service << EOF
+[Unit]
+Description=Easy server system service
+
+[Service]
+Restart=on-failure
+Type=simple
+User=easy
+WorkingDirectory=/home/easy/current
+Environment=RAILS_ENV=production
+PIDFile=/home/easy/application.pid
+ExecStart=/bin/bash -lc 'rvm default do unicorn -D -c /home/easy/unicorn.rb -E production'
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+```
+
+Load this service to systemd
+```
+systemctl daemon-reload
+```
+
+Try to start service
+```
+systemctl start easy.service
+systemctl enable easy.service
+```
+
+Now you have application with all deps under user. You have systemd service, that can manage unicorn serving application
+
+
+
+
+Install and configure NGINX
+===========================
+
+we recomend at least nginx 1,5+
+
+This configuration example is working minimum. In example we show a few great options you could use. We recommend to be familiar at least with nginx beginners guide before installation (http://nginx.org/en/docs/beginners_guide.html).
+
+On centos system nginx is in epel repository so we need to install epel-release package and after that install nginx package
+
+```
+yum install epel-release
+yum install nginx
+```
+
+Then you modify and place example (root and ssl paths) below to path /etc/nginx/conf.d/easy.conf
+
+```
+cat > /etc/nginx/conf.d/easy.conf << EOF
+
+# Definition of upstream socket
+#
+# documentation http://nginx.org/en/docs/http/ngx_http_upstream_module.html
+#
+upstream rails {
+  server                        unix:///home/easy/application.sock;
+}
+
+
+
+# uncomment if need permanent redirect from http to https
+#server {
+#  listen                        80;
+#  listen                        [::]:80;
+#  server_name                   _;
+#  location / {
+#    rewrite                     ^(.*) https://$http_host$1 permanent;
+#  }
+#}
+
+
+server {
+  listen                        443 default ssl http2;
+  listen                        [::]:443 ssl http2;
+# listen                        80;
+# listen                        [::]:80;
+
+  client_max_body_size          100M;
+
+
+# the aplication will listen on all server names
+  server_name                   _;
+
+# In this case the root of our application is /home/easy/current
+  root                          /home/easy/current/public;
+
+  try_files                     $uri @app;
+  error_page                    500 502 503 504 /500.html;
+
+# Uncoment if you would like to compress defined types in gzip_types option
+#  gzip                          on;
+#  gzip_http_version             1.0;
+#  gzip_disable                  "MSIE [1-6]\.(?!.*SV1)";
+#  gzip_buffers                  4 16k;
+#  gzip_comp_level               4;
+#  gzip_min_length               0;
+#  gzip_types                    text/plain
+#                                text/css
+#                                application/x-javascript
+#                                text/xml
+#                                application/xml
+#                                application/xml+rss
+#                                text/javascript
+#                                application/json;
+
+
+# Uncoment in case you want to cache static content
+#  location ~ ^/(images|system|assets)/ {
+#    gzip_static                 on;
+#    expires                     1y;
+#    add_header                  Cache-Control public;
+#    add_header                  ETag '';
+#    break;
+#  }
+
+
+  location @app {
+    proxy_pass                  http://rails;
+    proxy_set_header            Host $http_host;
+    proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header            X-Forwarded-Proto $scheme;
+    proxy_connect_timeout       600;
+    proxy_send_timeout          600;
+    proxy_read_timeout          600;
+    send_timeout                600;
+  }
+
+
+# Uncoment only if use redirect from http to https
+#  ssl                          on;
+
+  ssl_certificate              /etc/nginx/self_signed.crt;
+  ssl_certificate_key          /etc/nginx/self_signed.key;
+  ssl_session_cache            shared:SSL:10m;
+  ssl_session_timeout 5m;
+  ssl_protocols                TLSv1.2;
+  ssl_ciphers                  'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256';
+  ssl_prefer_server_ciphers    on;
+
+}
+EOF
+```
+
+Now restart nginx by command
+```
+systemctl restart nginx
+systemctl enable nginx
+```
+
+(optional) cron setup
+https://www.easyredmine.com/resources/redmine-installation/common-troubles/236-alerts-help-desk-do-not-work-my-data-are-obsolete
+
+After all these steps you have nginx working as reverse proxy behind unicorn that server application and mariadb as database mysql server in background. Everything is almost production ready now you just need firewall, backuping and stuff like this...
