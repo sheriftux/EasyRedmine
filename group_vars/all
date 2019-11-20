@@ -29,9 +29,9 @@ db_password: B83JEMLDZ@gH
 #Home: http://easyredmine.com
 
 #Templates Files
-src_db_backup: ../../../easyremine/files/easyremine.sql
+src_db_backup: ./files/easy-elwakeel.sql
 dest_db_backup: /tmp/easyremine.sql
-src_web_backup: ../../../easyremine/files/public_html.tar.gz
-dest_web_backup: /home/{{ sys_user }}/public_html.tar.gz
+#src_web_backup: ../../../easyremine/files/public_html.tar.gz
+#dest_web_backup: /home/{{ sys_user }}/public_html.tar.gz
 src_ng_conf: nginx_vhost.conf
 dest_ng_conf: /etc/nginx/conf.d/easyremine.conf
