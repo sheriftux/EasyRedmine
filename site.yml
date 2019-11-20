@@ -19,6 +19,7 @@
     - role: "../Deployment/nginx"
     - role: "../Deployment/mariadb"
     - role: "../Deployment/secure_db"
+    - role: "../Deployment/Ruby"
 
 - name: Copy The Templates Files
   hosts: easyremine-app
