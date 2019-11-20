@@ -1,27 +1,7 @@
 ---
 - name: Install Ruby package
-  yum: name={{ item }} state=installed
-  with_items:
-   - bzip2
-   - gettext
-   - ImageMagick
-   - patch
-   - libtool
-   - automake
-   - gcc-c++
-   - autoconf
-   - bison
-   - glibc-devel
-   - glibc-headers
-   - openssl-devel
-   - libyaml-devel
-   - ImageMagick-devel
-   - libffi-devel
-   - ruby-devel
-   - libuuid-devel
-   - mariadb-devel
-   - zlib-devel
-   - sqlite-devel
-   - make
-   - unzip
-   - readline-devel
+  yum:
+    name:  [ 'bzip2', 'gettext', 'ImageMagick', 'patch', 'libtool', 'automake', 'gcc-c++', 'autoconf', 'bison',
+    'glibc-devel', 'glibc-headers', 'openssl-devel', 'libyaml-devel', 'ImageMagick-devel', 'libffi-devel',
+    'ruby-devel', 'libuuid-devel', 'mariadb-devel', 'zlib-devel', 'sqlite-devel', 'make', 'unzip', 'readline-devel'
+    ]
